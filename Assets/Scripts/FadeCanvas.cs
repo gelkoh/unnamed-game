@@ -5,7 +5,7 @@ public class FadeCanvas : MonoBehaviour
 {
     private CanvasGroup m_canvasGroup;
 
-    void OnEnable()
+    /*void OnEnable()
     {
         GameStateManager.OnPage2 += HandlePage2;
     }
@@ -13,14 +13,14 @@ public class FadeCanvas : MonoBehaviour
     void OnDisable()
     {
         GameStateManager.OnPage2 -= HandlePage2;
-    }
+    }*/
     
     void Awake()
     {
         m_canvasGroup = this.gameObject.GetComponent<CanvasGroup>();
     }
 
-    private void HandlePage2()
+    /*private void HandlePage2()
     {
         StartCoroutine(Fade());
     }
@@ -35,5 +35,5 @@ public class FadeCanvas : MonoBehaviour
             
             yield return new WaitForSeconds(0.02f);
         }
-    }
+    }*/
 }

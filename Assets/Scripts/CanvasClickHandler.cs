@@ -7,8 +7,13 @@ using System.Collections.Generic;
 // Dieses Skript liegt auf dem Canvas (oder Manager) in der Level-Szene
 public class CanvasClickHandler : MonoBehaviour
 {
-    [SerializeField] private Canvas canvas;
-    [SerializeField] private Vector2 referenceResolution;
+    private Canvas canvas;
+    [SerializeField] private Vector2 referenceResolution = new Vector2(1920, 1080);
+
+    void Awake()
+    {
+        canvas = this.gameObject.GetComponent<Canvas>();
+    }
 
     // Wird vom PageClickDetector in der Main Scene aufgerufen
     public void HandlePageClick(Vector2 uvHit)

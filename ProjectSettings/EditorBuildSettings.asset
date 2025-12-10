@@ -6,26 +6,32 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Main.unity
+    path: Assets/__Scenes/Main.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   - enabled: 1
-    path: Assets/Scenes/Cover.unity
+    path: Assets/__Scenes/Cover.unity
     guid: bc551ab872e6bfa87bfd959880f15112
   - enabled: 1
-    path: Assets/Scenes/Endpaper.unity
+    path: Assets/__Scenes/Endpaper.unity
     guid: 70d73865688b0d80fa2eb304b0476262
   - enabled: 1
-    path: Assets/Scenes/FrontispieceAndTitlepage.unity
+    path: Assets/__Scenes/FrontispieceAndTitlepage.unity
     guid: 8cc397adf3b09b80f8b040e8db796aac
   - enabled: 1
-    path: Assets/Scenes/Page1.unity
+    path: Assets/__Scenes/Page1.unity
     guid: 706b855e6822b62a3a59bff07e6d021d
   - enabled: 1
-    path: Assets/Scenes/Page2.unity
+    path: Assets/__Scenes/Page2.unity
     guid: 5523b9179ae8ed34c936e8a5b2ce8894
-  - enabled: 1
-    path: Assets/Scenes/Page3.unity
+  - enabled: 0
+    path: Assets/__Scenes/Page3.unity
     guid: 94ab96df2f828bcbf9fe3837fd4e7f9e
+  - enabled: 1
+    path: Assets/__Scenes/GameplayScene.unity
+    guid: 165661e504140cdfe8cd0468e62d7f09
+  - enabled: 1
+    path: Assets/__Scenes/PagesScene.unity
+    guid: c8665febd05d6443f863e24e8f044eca
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 175e9b4741e89b78c8e48e5d4e6f8d14, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

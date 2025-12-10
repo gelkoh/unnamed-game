@@ -28,6 +28,8 @@ public class PageClickDetector : MonoBehaviour
         RaycastHit hit;
         Ray ray = m_mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
+		//Debug.Log("Handle Click");
+
         // Prüfen, ob die 3D-Buchseite getroffen wird
         if (Physics.Raycast(ray, out hit))
         {

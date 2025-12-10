@@ -1,36 +1,49 @@
 using UnityEngine;
 
-public static class PlayerPrefsManager
+public class PlayerPrefsManager : SingletonManager
 {
-    public static void SaveMasterVolume(float level)
+    public static PlayerPrefsManager Instance;
+    
+    public override void InitializeManager()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        
+        Instance = this;
+    }
+    
+    public void SaveMasterVolume(float level)
     {
         PlayerPrefs.SetFloat("MasterVolume", level);
         PlayerPrefs.Save();
     }
     
-    public static void SaveSFXVolume(float level)
+    public void SaveSFXVolume(float level)
     {
         PlayerPrefs.SetFloat("SFXVolume", level);
         PlayerPrefs.Save();
     }
 
-    public static void SaveMusicVolume(float level)
+    public void SaveMusicVolume(float level)
     {
         PlayerPrefs.SetFloat("MusicVolume", level);
         PlayerPrefs.Save();
     }
 
-    public static float GetMasterVolume()
+    public float GetMasterVolume()
     {
         return PlayerPrefs.GetFloat("MasterVolume");
     }
     
-    public static float GetSFXVolume()
+    public float GetSFXVolume()
     {
         return PlayerPrefs.GetFloat("SFXVolume");
     }
     
-    public static float GetMusicVolume()
+    public float GetMusicVolume()
     {
         return PlayerPrefs.GetFloat("MusicVolume");
     }
