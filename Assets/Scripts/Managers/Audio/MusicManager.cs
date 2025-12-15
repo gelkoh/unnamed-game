@@ -4,7 +4,9 @@ public class MusicManager : SingletonManager
 {
     public static MusicManager Instance;
 
-    private AudioSource m_musicSource;
+    [SerializeField] private AudioSource m_musicObject;
+
+	[SerializeField] private MusicLibrary m_musicLibrary;
 
     public override void InitializeManager()
     {
@@ -15,29 +17,22 @@ public class MusicManager : SingletonManager
         }
 
         Instance = this;
-
-        m_musicSource = this.gameObject.GetComponent<AudioSource>();
     }
 
-    void Awake()
-    {
-        Debug.Log("AWAKE!");
-    }
-    
-    void Start()
-    {
-        // 1. Prüfen, ob die Quelle vorhanden ist
-        if (m_musicSource == null)
-        {
-            Debug.LogError("MusicManager: AudioSource reference is missing!");
-            return;
-        }
+	private void Start()
+	{
+		Play(MusicContext.Chapter1);
+	}
 
-        // 2. Manuelle Zuweisung des Clips (falls nicht schon im Editor geschehen)
-        // m_musicSource.clip = someMusicClip; 
+	public void Play(MusicContext context)
+	{
+		AudioSource audioSource = Instantiate(m_musicObject);
 
-        // 3. EXPLIZITES Starten der Musikwiedergabe
-        m_musicSource.Play();
-        Debug.Log("Music started manually.");
-    }
+		MusicTrack musicTrack = m_musicLibrary.GetMusicTrackForContext(context);
+
+		audioSource.clip = musicTrack.audioClip;
+		audioSource.volume = musicTrack.defaultVolume;
+		
+		audioSource.Play();
+	}
 }

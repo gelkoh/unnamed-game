@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d9a9e5962cc4885a599dcb0f960cc05, type: 3}
+  m_Name: RegularPagesMusicTrack
+  m_EditorClassIdentifier: Assembly-CSharp::MusicTrack
+  audioClip: {fileID: 8300000, guid: c547011bdc099e9f8865567629ade7c5, type: 3}
+  context: 0
+  defaultVolume: 1

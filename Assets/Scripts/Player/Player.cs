@@ -19,8 +19,6 @@ public class Player : MonoBehaviour
     
 	public void OnTriggerEnter2D(Collider2D other)
 	{
-		Debug.Log("Collided with " + other.tag);
-
 		if (other.tag == "Water")
 		{
 			Die();
@@ -34,4 +32,21 @@ public class Player : MonoBehaviour
         Checkpoint lastCheckpoint = GameStateManager.Instance.GetCheckpoint();
         this.transform.position = lastCheckpoint.transform.position;
     }
+
+	public void Save(ref PlayerSaveData playerSaveData)
+	{
+		playerSaveData.Position = transform.position;
+	}
+
+	public void Load(PlayerSaveData playerSaveData)
+	{
+	
+		transform.position = playerSaveData.Position;
+	}
+}
+
+[System.Serializable]
+public struct PlayerSaveData
+{
+	public Vector3 Position;
 }

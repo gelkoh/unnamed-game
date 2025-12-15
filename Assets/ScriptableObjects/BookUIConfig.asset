@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87012e2279ce4ddcbf9da2d15913cc20, type: 3}
+  m_Name: BookUIConfig
+  m_EditorClassIdentifier: Assembly-CSharp::BookUIConfig
+  PagesUICanvasPrefab: {fileID: 7386428573817058019, guid: 76b61b94a7e89e885b009f46dc9de02a, type: 3}
+  PageBorderPrefab: {fileID: 5451873706079979175, guid: 75c12e22d9e46f1468b6d2b77b5a061f, type: 3}
+  PreviousPageButtonPrefab: {fileID: 9091707722633871589, guid: 0a72fe86ea5b491d3877f8bda83ef14a, type: 3}
+  NextPageButtonPrefab: {fileID: 9091707722633871589, guid: 1374dbadae27f1851b1e6e8390eaf9b7, type: 3}
+  PageNumberLeftPrefab: {fileID: 4033110780349444448, guid: 1acb47bbd97c58678a3602363a064bf5, type: 3}
+  PageNumberRightPrefab: {fileID: 3909822265447318456, guid: 714adae2060439438898592be1ffb32e, type: 3}
+  PreviousPageButtonOffset: {x: -860, y: 0, z: 0}
+  NextPageButtonOffset: {x: 860, y: 0, z: 0}
+  PageNumberLeftOffset: {x: -850, y: -470, z: 0}
+  PageNumberRightOffset: {x: 850, y: -470, z: 0}

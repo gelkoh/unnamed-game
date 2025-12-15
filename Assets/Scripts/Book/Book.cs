@@ -1,5 +1,7 @@
 using UnityEngine;
+using System;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class Book : MonoBehaviour
 {
@@ -8,13 +10,24 @@ public class Book : MonoBehaviour
 	[SerializeField] private BookSettings m_bookSettings;
 
     private int m_currentPageIndex = 0;
-    public int PageCount { get; private set; } 
 
 	[SerializeField] private Material m_gameplayLeftMaterial;
 	[SerializeField] private Material m_gameplayRightMaterial;
 
 	[SerializeField] private Material m_otherLeftMaterial;
 	[SerializeField] private Material m_otherRightMaterial;
+
+	public static Action<PageID> OnPageFlip;
+
+	private PageID m_currentPage = PageID.Cover;
+
+	public PageID CurrentPage
+	{
+		get => m_currentPage;
+		set => m_currentPage = value;
+	}
+
+	private MusicManager m_musicManager;
 
 	void Awake()
 	{
@@ -23,21 +36,25 @@ public class Book : MonoBehaviour
 			Instance = this;
 		}
 
-		PageCount = transform.childCount;
+		m_musicManager = ManagersManager.Get<MusicManager>();
 	}
 
     void OnEnable()
     {
-		GameStateManager.OnStart += HandleStart;
+		GameStateManager.OnStart += HandleStartGame;
+		GameStateManager.OnGameStateChanged += HandleGameStateChanged;
     }
 
     void OnDisable()
     {
-		GameStateManager.OnStart -= HandleStart;
+		GameStateManager.OnStart -= HandleStartGame;
+		GameStateManager.OnGameStateChanged -= HandleGameStateChanged;
     }
     
     void Start()
     {
+		//m_musicManager.Play(MusicContext.RegularPages);
+
 		int counter = 0;		
 
 		foreach (Transform child in this.gameObject.transform)
@@ -68,8 +85,20 @@ public class Book : MonoBehaviour
 		}
     }
   
-	private void HandleStart()
+	private void HandleGameStateChanged(GameState gameState)
 	{
+		// TODO: FIX PROBLEM
+		/*if (gameState == GameState.Playing)
+		{		
+			this.gameObject.GetComponent<Rotate3DObject>().RotateBack();
+			StartCoroutine(MoveBook());
+			FlipPage();
+		}*/
+	}
+
+	private void HandleStartGame()
+	{
+		this.gameObject.GetComponent<Rotate3DObject>().RotateBack();
 		StartCoroutine(MoveBook());
 		FlipPage();
 	}
@@ -89,6 +118,15 @@ public class Book : MonoBehaviour
 
 		this.gameObject.transform.GetChild(m_currentPageIndex).GetComponent<PageFlipper>().FlipForward();
 		m_currentPageIndex++;
+
+		m_currentPage = (PageID)m_currentPageIndex;
+
+		OnPageFlip?.Invoke(m_currentPage);
+
+		if (m_currentPage == PageID.Chapter1Introduction)
+		{
+			SceneManager.LoadScene("Chapter1GameplayScene", LoadSceneMode.Additive);
+		}
     }
     
     public void FlipPageBackward()
@@ -97,6 +135,10 @@ public class Book : MonoBehaviour
 
 	    this.gameObject.transform.GetChild(m_currentPageIndex-1).GetComponent<PageFlipper>().FlipBackward();
 	    m_currentPageIndex--;
+
+    	m_currentPage = (PageID)m_currentPageIndex;
+
+		OnPageFlip?.Invoke(m_currentPage);
     }
 
 	public void FlipToPage(int index)
@@ -104,6 +146,8 @@ public class Book : MonoBehaviour
 		StartCoroutine(MoveBook());
 		
 		StartCoroutine(FlipToPageRoutine(index));
+
+		//OnPageFlip?.Invoke(m_currentPageIndex);
 	}
 
 	private IEnumerator FlipToPageRoutine(int index)

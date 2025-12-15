@@ -1,42 +1,41 @@
 using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
-public class CameraManager : MonoBehaviour
+public class CameraManager : SingletonManager 
 {
-    [SerializeField] private GameObject m_initialCamera;
-	[SerializeField] private GameObject m_secondCamera;
-	[SerializeField] private GameObject m_thirdCamera;
+  	public static CameraManager Instance;
 
-    /*void OnEnable()
-    {
-        GameStateManager.OnStart += HandleStart;
-		GameStateManager.OnNextPage += HandleNextPage;
-    }
-    
-    void OnDisable()
-    {
-        GameStateManager.OnStart -= HandleStart;
-		GameStateManager.OnNextPage -= HandleNextPage;
-    }
+  	private Dictionary<PageID, Camera> m_map = new Dictionary<PageID, Camera>();
 
-    private void HandleStart()
-    {
-        m_initialCamera.SetActive(false);
-    }
-
-	private void HandleNextPage()
+  	public override void InitializeManager() 
 	{
-		StartCoroutine(ZoomOut());
-	}
+    	if (Instance != null && Instance != this) {
+      		Destroy(gameObject);
+      		return;
+    	}
 
-    private IEnumerator ZoomOut()
-    {
-		m_thirdCamera.SetActive(true);
-		m_secondCamera.SetActive(false);
+    	Instance = this;
+  	}
 
-        yield return new WaitForSeconds(1f);
+  	public void Register(PageID pageID, Camera cam)
+	{
+    	m_map[pageID] = cam;
+  	}
 
-        m_thirdCamera.SetActive(false);
-        m_secondCamera.SetActive(true);
-    }*/
+  	public void Unregister(PageID pageID, Camera cam) 
+	{
+    	if (m_map.TryGetValue(pageID, out Camera existing) && existing == cam) 
+		{
+     		m_map.Remove(pageID);
+    	}
+  	}
+
+  	public Camera GetCamera(PageID pageID) 
+	{
+    	m_map.TryGetValue(pageID, out Camera cam);
+    	return cam;
+  	}
+
+  	public void EnableCamera() {}
+  	public void DisableCamera() {}
 }

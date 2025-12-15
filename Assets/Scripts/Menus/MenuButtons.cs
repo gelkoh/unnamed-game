@@ -11,8 +11,6 @@ public class MenuButtons : MonoBehaviour
     public InputActionAsset InputActions;
 
     private InputAction m_navigateAction;
-
-    private int m_activeButtonIndex = 0;
     
     void OnEnable()
     {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class ManagersManager : MonoBehaviour
 {
+    // TODO: Make this automatically
     [SerializeField] protected List<SingletonManager> managers = new List<SingletonManager>();
 
     public static ManagersManager Instance;

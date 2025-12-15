@@ -1,155 +1,162 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
 public class PlayerMovement : MonoBehaviour
 {
-    //private Camera mainCamera;
+    // Components
     private Rigidbody2D rb;
-    private AudioSource audioSource;
+    private BoxCollider2D col;
 
-    private Vector2 velocity; // eigene Geschwindigkeitsberechnung
-    private Vector2 inputAxis; // wie stark der Spieler auf die Tasten drückt
-    
-    public AudioClip m_jumpSound;
+    // Input
+    private InputAction moveAction;
+    private InputAction jumpAction;
 
-    // arrow syntax: turning it into a property, computing this based on other values
-    private float jumpForce; // half the time -> multiply and dividing by time
+    // Movement
+    private Vector2 velocity;
+    private Vector2 input;
+
+    // Player stats
+    private PlayerStats stats;
+
+    // Ground check
+    public bool grounded { get; private set; }
+    public LayerMask groundMask;
+
+    // Gravity & jump
+    private float jumpVelocity;
     private float gravity;
+	
+	// Sound
+	[SerializeField] private AudioClip m_jumpSound;
 
-    // properties that have a public getter, but a private setter -> need to read the value in other scripts
-    public bool grounded { get; private set; } 
-    public bool jumping { get; private set; }
-    //public bool running => Mathf.Abs(velocity.x) > 0.25f || Mathf.Abs(inputAxis) > 0.25f;
-    //public bool sliding => (inputAxis > 0f && velocity.x < 0f) || (inputAxis < 0f && velocity.x > 0f); // turning movement 
-
-    //public InputActionAsset InputActions;
-
-    private InputAction m_moveAction;
-    private InputAction m_jumpAction;
-    
-    private Vector2 m_moveValue;
-
-    private PlayerStats m_playerStats;
-    
-    private void Awake()
+    void Start()
     {
-        InputActionAsset inputActions = InputSystem.actions; 
-        
-        m_moveAction = inputActions.FindAction("Move");
-        m_jumpAction = inputActions.FindAction("Jump");
-        
         rb = GetComponent<Rigidbody2D>();
+        col = GetComponent<BoxCollider2D>();
 
-        m_playerStats = this.gameObject.GetComponent<Player>().m_playerStats;
+        stats = GetComponent<Player>().m_playerStats;
 
-        jumpForce = (2f * m_playerStats.MaxJumpHeight) / (m_playerStats.MaxJumpTime / 2f);
-        gravity = (-2f * m_playerStats.MaxJumpHeight) / Mathf.Pow((m_playerStats.MaxJumpTime / 2f), 2);
+        // Compute jump physics from desired params
+        jumpVelocity = (2 * stats.MaxJumpHeight) / (stats.MaxJumpTime / 2f);
+        gravity = (-2 * stats.MaxJumpHeight) / Mathf.Pow(stats.MaxJumpTime / 2f, 2);
 
-        //mainCamera = Camera.main;
-        //audioSource = GetComponent<AudioSource>();
+        // Setup input
+        var inputActions = InputSystem.actions;
+        moveAction = inputActions.FindAction("Move");
+        jumpAction = inputActions.FindAction("Jump");
+
+     	moveAction.Enable();
+        jumpAction.Enable();
     }
-    
-    private void OnEnable()
+
+    void OnDisable()
     {
-        m_moveAction.Enable();
-        m_jumpAction.Enable();
+        moveAction.Disable();
+        jumpAction.Disable();
     }
 
-    private void OnDisable()
+   	private void Update()
+	{
+		input = moveAction.ReadValue<Vector2>();
+
+    	grounded = CheckGrounded();      // 1. Ground before anything else
+    	HorizontalMovement();            // 2. Calc velocity.x
+
+    	if (grounded)
+        	HandleJump();                // 3. Jump sets velocity.y
+
+    	ApplyGravity();                  // 4. Only applies when NOT grounded
+	}
+
+    void FixedUpdate()
     {
-        m_moveAction.Disable();
-        m_jumpAction.Disable();
+        rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
     }
 
-    private void Update()
-    {
-        HorizontalMovement();
-        
-        grounded = CheckGrounded();
-
-        if (grounded)
-            GroundedMovement();
-
-        ApplyGravity();
-    }
+    // -----------------------------
+    // Movement Logic
+    // -----------------------------
 
     private void HorizontalMovement()
     {
-        inputAxis = m_moveAction.ReadValue<Vector2>();
-        
-        velocity.x = Mathf.MoveTowards(
-            velocity.x,
-            inputAxis.x * m_playerStats.MovementSpeed,
-            m_playerStats.MovementSpeed * Time.deltaTime * 3f
-        );
+        float targetSpeed = input.x * stats.MovementSpeed;
+        velocity.x = Mathf.MoveTowards(velocity.x, targetSpeed, stats.MovementSpeed * 8f * Time.deltaTime);
 
- 
-        
-        /*if (CheckWall(velocity.x))
-        {
-            velocity.x = 0f;
-        }*/
+        // Flip sprite
+        //if (velocity.x > 0) transform.eulerAngles = Vector3.zero;
+        //if (velocity.x < 0) transform.eulerAngles = new Vector3(0, 180, 0);
+		Vector3 newScale = transform.localScale;
 
-        //Debug.Log(velocity.x);
-        
-        // Sprite flip
-        if (velocity.x > 0)
-            transform.eulerAngles = Vector3.zero;
-        else if (velocity.x < 0)
-            transform.eulerAngles = new Vector3(0, 180, 0);
+		if (velocity.x > 0 && newScale.x < 0)
+    	{ 
+       	 	newScale.x *= -1; // Skalierung von negativ auf positiv setzen (z.B. von -1 auf +1)
+        	transform.localScale = newScale;
+    	}
+    
+    	// 2. Bewegung nach LINKS (velocity.x < 0)
+    	// Flip nur, wenn der Spieler momentan nach rechts schaut (d.h. Skalierung ist positiv)
+    	else if (velocity.x < 0 && newScale.x > 0) 
+    	{	
+        	newScale.x *= -1; // Skalierung von positiv auf negativ setzen (z.B. von +1 auf -1)
+        	transform.localScale = newScale;
+    	}
     }
 
-    private void GroundedMovement()
-    {
-        velocity.y = Mathf.Max(velocity.y, 0f);
-        jumping = velocity.y > 0f;
+    private void HandleJump()
+	{
+    	// Falls der Spieler gerade nach unten fällt beim Landen:
+    	if (velocity.y < 0f)
+        	velocity.y = 0f;
 
-        if (m_jumpAction.WasPressedThisFrame())
-        {
-            velocity.y = jumpForce;
-            jumping = true;
+    	if (jumpAction.WasPressedThisFrame())
+    	{
+        	velocity.y = jumpVelocity;
 
-            SFXManager.Instance.PlaySFXClip(m_jumpSound, this.gameObject.transform, 1f);
-            //if (jumpSound && audioSource)
-                //audioSource.PlayOneShot(jumpSound);
-        }
-    }
+        	SFXManager.Instance.PlaySFXClip(m_jumpSound, transform, 1f);
+    	}
+	}
+
 
     private void ApplyGravity()
-    {
-        bool falling = velocity.y < 0f;
-        float multiplier = falling ? 5f : 2f;
+	{
+    	if (grounded && velocity.y <= 0f)
+    	{
+        	velocity.y = 0f;     // WICHTIG: NICHT gravity überschreiben
+        	return;              // Gravity NICHT anwenden
+    	}
 
-        velocity.y += gravity * multiplier * Time.deltaTime;
-        velocity.y = Mathf.Max(velocity.y, gravity / 2f);
-    }
+    	bool falling = velocity.y < 0f;
+    	float multiplier = falling ? 2f : 1f;
 
-    private void FixedUpdate()
-    {
-        Vector2 pos = rb.position;
-        pos += velocity * Time.fixedDeltaTime;
+    	velocity.y += gravity * multiplier * Time.deltaTime;
+	}
 
-        //Debug.Log("Pos: " + pos);
-
-        /*Vector2 left = mainCamera.ScreenToWorldPoint(Vector2.zero);
-        Vector2 right = mainCamera.ScreenToWorldPoint(new Vector2(Screen.width, Screen.height));
-
-        pos.x = Mathf.Clamp(pos.x, left.x + 0.5f, right.x - 0.5f);*/
-
-        rb.MovePosition(pos);
-    }
+    // -----------------------------
+    // Collision Checks
+    // -----------------------------
 
     private bool CheckGrounded()
-    {
-        Vector2 origin = rb.position + Vector2.down * 0.1f;
-        return Physics2D.Raycast(origin, Vector2.down, 0.2f, ~0);
-    }
+	{
+    	Bounds b = col.bounds;
+    	Vector2 origin = new Vector2(b.center.x, b.min.y - 0.05f);
 
-    private bool CheckWall(float direction)
-    {
-        Vector2 origin = rb.position;
-        Vector2 dir = new Vector2(Mathf.Sign(direction), 0);
+    	return Physics2D.BoxCast(
+        	origin,
+        	new Vector2(b.size.x * 0.9f, 0.1f),
+        	0f,
+        	Vector2.down,
+        	0.01f,
+        	groundMask
+    	);
+	}
 
-        return Physics2D.Raycast(origin, dir, 0.2f, ~0);
+    private void OnDrawGizmos()
+    {
+        if (col == null) return;
+
+        Gizmos.color = grounded ? Color.green : Color.red;
+        Bounds b = col.bounds;
+        Gizmos.DrawWireCube(new Vector3(b.center.x, b.min.y - 0.05f, 0), new Vector3(b.size.x * 0.9f, 0.1f, 1));
     }
 }

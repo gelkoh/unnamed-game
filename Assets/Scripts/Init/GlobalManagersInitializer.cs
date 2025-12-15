@@ -29,7 +29,7 @@ public class GlobalManagersInitializer
 
 			//SceneManager.LoadScene("Main", LoadSceneMode.Additive);
 			SceneManager.LoadScene("PagesScene", LoadSceneMode.Additive);
-            SceneManager.LoadScene("GameplayScene", LoadSceneMode.Additive);
+            //SceneManager.LoadScene("GameplayScene", LoadSceneMode.Additive);
         }
     }
 }

@@ -19,6 +19,6 @@ public class LoadGameButtonAdapter : MonoBehaviour
     {
         SaveLoadManager saveLoadManager = ManagersManager.Get<SaveLoadManager>();
 
-        saveLoadManager.Load();
+        //saveLoadManager.Load();
     }
 }

@@ -1,8 +1,19 @@
 using UnityEngine;
+using System.IO;
 
 public class SaveLoadManager : SingletonManager
 {
     public static SaveLoadManager Instance;
+
+	private string m_saveFile;
+
+	private SaveData m_saveData = new SaveData();
+
+	[System.Serializable]
+	public struct SaveData
+	{
+		public PlayerSaveData PlayerData;
+	}
     
     public override void InitializeManager()
     {
@@ -13,12 +24,17 @@ public class SaveLoadManager : SingletonManager
         }
         
         Instance = this;
+
+		m_saveFile = Application.persistentDataPath + "/save.json";
     }
 
-    public void Load()
-    {
-        int loadedPageIndex = 4;
-        Book.Instance.FlipToPage(loadedPageIndex);
-        Debug.Log("Loading Game");
-    }
+	public void Save()
+	{
+		HandleSaveData();
+	}
+
+	private void HandleSaveData()
+	{
+		 Player.Instance.Save(ref m_saveData.PlayerData);
+	}
 }
