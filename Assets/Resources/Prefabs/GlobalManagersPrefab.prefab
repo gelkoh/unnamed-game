@@ -466,8 +466,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96cb5d102c360ded5afbb39e7eac6125, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  m_defaultCursorTexture: {fileID: 2800000, guid: edde7b57b4f6b14c7a48255e3a20271b, type: 3}
-  m_grabCursorTexture: {fileID: 2800000, guid: 2ebb9848a293f34149907536ca13dfef, type: 3}
+  m_defaultCursorTexture: {fileID: 2800000, guid: ab2edd5c9615c76ceb7d8b1210cd65ec, type: 3}
+  m_pointerCursorTexture: {fileID: 2800000, guid: 34f34b4e5adc760c0b3f18725959f4f5, type: 3}
+  m_rotateCursorTexture: {fileID: 2800000, guid: 817f44a101b10b4e588648ccd7fa44fe, type: 3}
 --- !u!1 &9122677432959344672
 GameObject:
   m_ObjectHideFlags: 0

@@ -53,15 +53,13 @@ public class Book : MonoBehaviour
     
     void Start()
     {
-		//m_musicManager.Play(MusicContext.RegularPages);
-
 		int counter = 0;		
 
 		foreach (Transform child in this.gameObject.transform)
 		{
 			child.gameObject.AddComponent<PageFlipper>();
 
-			if (counter > 4)
+			if (counter > 4 && counter < gameObject.transform.childCount - 1)
 			{
 				MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
 
@@ -98,7 +96,7 @@ public class Book : MonoBehaviour
 
 	private void HandleStartGame()
 	{
-		this.gameObject.GetComponent<Rotate3DObject>().RotateBack();
+		//this.gameObject.GetComponent<Rotate3DObject>().RotateBack();
 		StartCoroutine(MoveBook());
 		FlipPage();
 	}
@@ -126,7 +124,8 @@ public class Book : MonoBehaviour
 		if (m_currentPage == PageID.Chapter1Introduction)
 		{
 			SceneManager.LoadScene("Chapter1GameplayScene", LoadSceneMode.Additive);
-		}
+			SceneManager.LoadScene("Chapter2GameplayScene", LoadSceneMode.Additive);
+		}	
     }
     
     public void FlipPageBackward()

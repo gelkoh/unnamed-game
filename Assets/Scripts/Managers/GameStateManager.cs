@@ -5,8 +5,11 @@ using UnityEngine.SceneManagement;
 public enum GameState
 {
     MainMenu,
+    MainMenuSettings,
     IngameMenu,
-    Playing
+    Playing,
+    MainMenuLoad,
+	MainMenuLoadGame
 }
 
 public class GameStateManager : SingletonManager
@@ -24,9 +27,7 @@ public class GameStateManager : SingletonManager
 	public static Action OnStart;
 
 	private Checkpoint m_lastCheckpoint = null;
-
-
-
+	
 	public static Action<GameState> OnGameStateChanged;
 
 

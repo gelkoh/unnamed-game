@@ -1,110 +1,114 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class Rotate3DObject : MonoBehaviour
 {
+    [Header("Settings")]
+    [SerializeField] private float m_speed = 5f;
+    [SerializeField] private float m_maxVerticalAngle = 80f;
+
     private bool m_rotateAllowed;
-    private Camera m_camera;
-
-    [SerializeField] private float m_speed;
-    [SerializeField] private bool m_inverted;
-
     private InputAction m_leftClickInputAction;
     private InputAction m_mouseLookInputAction;
-    private Quaternion m_originalRotation;
-    private bool m_isRotatingBack = false;
-
-	private GameStateManager m_gameStateManager;
+    
+    private float m_currentPitch = 0f; // Vertikal
+    private float m_currentYaw = 0f;   // Horizontal
+    
+    private GameStateManager m_gameStateManager;
+    private Camera m_mainCamera;
 
     private void Awake()
     {
+        m_mainCamera = Camera.main;
         InputActionAsset inputActions = InputSystem.actions;
-
         m_leftClickInputAction = inputActions.FindAction("LeftClick");
         m_mouseLookInputAction = inputActions.FindAction("MouseLook");
 
         if (m_leftClickInputAction != null)
         {
-            m_leftClickInputAction.started += OnLeftClickPressed;
-            m_leftClickInputAction.performed += OnLeftClickPressed;
-            m_leftClickInputAction.canceled += OnLeftClickPressed;
+            m_leftClickInputAction.started += ctx => SetRotateAllowed(true);
+            m_leftClickInputAction.canceled += ctx => SetRotateAllowed(false);
         }
 
-        m_camera = Camera.main;
-        m_originalRotation = this.gameObject.transform.localRotation;
-
-		m_gameStateManager = ManagersManager.Get<GameStateManager>();
+        m_gameStateManager = ManagersManager.Get<GameStateManager>();
     }
 
     private void OnEnable()
     {
-        m_leftClickInputAction.Enable();
+        GameStateManager.OnStart += HandleStartGame;
+
+        m_leftClickInputAction.Enable(); 
         m_mouseLookInputAction.Enable();
     }
 
     private void OnDisable()
     {
-        m_leftClickInputAction.Disable();
+        GameStateManager.OnStart -= HandleStartGame;
+        
+        m_leftClickInputAction.Disable(); 
         m_mouseLookInputAction.Disable();
     }
 
-	// Better use coroutines here i think
     private void Update()
     {
-		// check when rotation is done
-        if (m_isRotatingBack)
-        {
-            transform.localRotation = Quaternion.RotateTowards(transform.localRotation, m_originalRotation, m_speed * Time.deltaTime);
-        }
+        if (m_gameStateManager.GetState() != GameState.MainMenu) return;
+        if (!m_rotateAllowed) return;
 
-		if (m_gameStateManager.GetState() != GameState.MainMenu)
-		{
-        	m_leftClickInputAction.Disable();
-        	m_mouseLookInputAction.Disable();
-			return;
-		}
+        Vector2 mouseDelta = m_mouseLookInputAction.ReadValue<Vector2>();
 
-        
-        if (!m_rotateAllowed)
-            return;
+        // Horizontal: Wir drehen den Pivot um die Welt-Y-Achse
+        m_currentYaw -= mouseDelta.x * m_speed * Time.deltaTime * 50f;
 
-        Vector2 mouseDelta = GetMouseLookInput();
-        mouseDelta *= m_speed * Time.deltaTime;
-        
-        transform.Rotate(Vector3.up * (m_inverted ? 1 : -1), mouseDelta.x, Space.World);
-        transform.Rotate(Vector3.right * (m_inverted ? -1 : 1), mouseDelta.y, Space.World);
-        
-        // Freeze z
-        Vector3 euler = transform.rotation.eulerAngles;
-        euler.z = 0; 
-        transform.rotation = Quaternion.Euler(euler);
+        // Vertikal: Wir drehen den Pivot um seine eigene "Rechts"-Achse (relativ zur Kamera)
+        m_currentPitch += mouseDelta.y * m_speed * Time.deltaTime * 50f;
+        m_currentPitch = Mathf.Clamp(m_currentPitch, -m_maxVerticalAngle, m_maxVerticalAngle);
+
+        // Wir wenden die Rotation an: Erst Yaw (Welt), dann Pitch (Lokal)
+        transform.rotation = Quaternion.Euler(m_currentPitch, m_currentYaw, 0f);
     }
 
-    protected virtual void OnLeftClickPressed(InputAction.CallbackContext context)
+    private void SetRotateAllowed(bool allowed)
     {
-        if (context.started || context.performed)
-        {
-            m_rotateAllowed = true;
-            ManagersManager.Get<CursorManager>().SetCursorState(CursorState.Grab);
-        }
-        else if (context.canceled)
-        {
-            m_rotateAllowed = false;
-            ManagersManager.Get<CursorManager>().SetCursorState(CursorState.Default);
-        }
-    }
-
-    protected virtual Vector2 GetMouseLookInput()
-    {
-        if (m_mouseLookInputAction != null)
-            return m_mouseLookInputAction.ReadValue<Vector2>();
-
-        return Vector2.zero;
+        m_rotateAllowed = allowed;
+        ManagersManager.Get<CursorManager>().SetCursorState(allowed ? CursorState.Rotate : CursorState.Default);
     }
 
     public void RotateBack()
     {
-        m_isRotatingBack = true;
-        //this.gameObject.transform.localRotation = m_originalRotation;
+        m_rotateAllowed = false;
+        StopAllCoroutines();
+        StartCoroutine(ResetPivotRoutine());
+    }
+
+    private IEnumerator ResetPivotRoutine()
+    {
+        float duration = 0.6f;
+        float elapsed = 0f;
+        
+        Quaternion startRot = transform.rotation;
+        // Da der Pivot bei 0,0,0 startet, ist das Ziel immer Identity
+        Quaternion targetRot = Quaternion.identity; 
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.SmoothStep(0, 1, elapsed / duration);
+
+            transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
+            yield return null;
+        }
+
+        transform.rotation = targetRot;
+        m_currentYaw = 0;
+        m_currentPitch = 0;
+    }
+
+    private void HandleStartGame()
+    {
+        RotateBack();
+        
+        // It's not possible to rotate the book anymore now
+        SetRotateAllowed(false);
     }
 }

@@ -7,7 +7,11 @@ public enum PageID
     FrontisPieceAndTitlepage,
     Chapter1Introduction,
     Chapter1Level1Gameplay,
-    Chapter1Level2Gameplay
+    Chapter1Level2Gameplay,
+	Chapter2Level1Gameplay,
+	Chapter2Level2Gameplay,
+	Chapter2Level3Gameplay,
+	Chapter2Level4Gameplay
 }
 
 [CreateAssetMenu(fileName = "BookPageConfig", menuName = "ScriptableObjects/BookPageConfig")]
